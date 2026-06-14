@@ -3,6 +3,8 @@
   "dnfMissingSub": "No se ha encontrado Dnf en tu sistema.",
   "updatedSystem": "Tu sistema está actualizado.",
   "updatesAvailable": "Actualizaciones disponibles",
+  "rebootNecessary": "Reinicio necesario",
+  "rebootNecessarySub": "Es necesario reiniciar el sistema",
   "updates": {
     "one": "Hay {count} actualización disponible.",
     "other": "Hay {count} actualizaciones disponibles."

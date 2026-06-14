@@ -1,6 +1,12 @@
-noctalia.setUpdateInterval(10000)
+noctalia.setUpdateInterval(60000)
 
-local hasShownNotification = false
+local hasShownUpdateNotification = false
+local hasShownRestartNotification = false
+
+type Stdout = {
+    exitCode: number,
+    stdout: string,
+}
 
 function update()
     if not noctalia.commandExists("dnf") then
@@ -8,12 +14,12 @@ function update()
         return
     end
 
-    noctalia.runAsync("dnf list --upgrades --color=never -q", function(stdout: {exitCode: number; stdout: string})
+    noctalia.runAsync("dnf list --upgrades --color=never -q", function(stdout: Stdout)
         if stdout.exitCode > 0 then return end
-
-        if not stdout.stdout then
+        if stdout.stdout == "" then
             noctalia.state.set("isUpdated", true)
             noctalia.state.set("updates", nil)
+            return
         end
 
         local packages: {[number]: {name: string, version: string, status: string}} = {}
@@ -26,10 +32,20 @@ function update()
         end
         noctalia.state.set("isUpdated", false)
         noctalia.state.set("updates", packages)
-        if not hasShownNotification then
+        if not hasShownUpdateNotification then
             noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #packages))
         end
-        hasShownNotification = true
+        hasShownUpdateNotification = true
+    end)
+
+    noctalia.runAsync("dnf needs-restarting", function(stdout:Stdout)
+        if stdout.exitCode > 0 then return end
+        local matches = string.gmatch(stdout.stdout, "Reboot should not be necessary.")
+        local firstMatch = matches()
+        if not firstMatch and not hasShownRestartNotification then
+            hasShownRestartNotification = true
+            noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
+        end
     end)
 end
 

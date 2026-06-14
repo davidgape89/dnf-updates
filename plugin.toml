@@ -1,0 +1,50 @@
+id = "davidgape89/dnf-updates"
+name = "DNF updates"
+version = "0.0.1"
+min_noctalia = "5.0.0"
+author = "davidgape89"
+license = "MIT"
+tags = ["dnf", "updates", "fedora"]
+icon = "refresh"
+description = "A plugin that checks if there are any software updates available."
+
+[[widget]]
+id = "dnf-updates"
+entry = "dnf-updates.luau"
+
+  [[widget.setting]]
+  key = "label"
+  type = "string"
+  label = "Label"
+  description = "Text shown in the bar."
+  default = "Up to date"
+
+  [[widget.setting]]
+  key = "updated-glyph"
+  type = "glyph"
+  label = "Updated glyph"
+  description = "Glyph shown before the label when system updated."
+  default = "refresh"
+
+  [[widget.setting]]
+  key = "not-updated-glyph"
+  type = "glyph"
+  label = "Not updated glyph"
+  description = "Glyph shown before the label when system not updated."
+  default = "refresh-alert"
+
+  [[widget.setting]]
+  key = "show_glyph"
+  type = "bool"
+  label = "Show glyph"
+  default = true
+
+  [[widget.setting]]
+  key = "show_label"
+  type = "bool"
+  label = "Show label"
+  default = true
+
+[[service]]
+id = "updates-service"
+entry = "updates-service.luau"

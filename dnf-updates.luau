@@ -1,6 +1,3 @@
--- local noctalia = require('Noctalia')
--- local barWidget = require('BarWidget')
-local label = barWidget.getConfig("label")
 local updatedGlyph = barWidget.getConfig("updated-glyph")
 local notUpdatedGlyph = barWidget.getConfig("not-updated-glyph")
 local showGlyph = barWidget.getConfig("show_glyph")
@@ -25,7 +22,6 @@ local function render()
     if not updates then
         barWidget.setTooltip(noctalia.tr("updatedSystem"))
         else
-        -- barWidget.setTooltip(`There are {#updates} updates available.`)
         barWidget.setTooltip(noctalia.trp("updates", #updates))
     end
 end

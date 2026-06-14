@@ -1,13 +1,4 @@
--- local noctalia = require('Noctalia')
-
 noctalia.setUpdateInterval(10000)
-
-function log(msg)
-    local logsPath = noctalia.pluginDir() .. "/dnf_logs"
-    local logsContent = noctalia.readFile(logsPath) or ""
-    local newLog = `[ {os.date()} ]: {msg}\n`
-    noctalia.writeFile(logsPath, logsContent .. newLog)
-end
 
 local hasShownNotification = false
 

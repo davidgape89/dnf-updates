@@ -13,13 +13,6 @@ id = "dnf-updates"
 entry = "dnf-updates.luau"
 
   [[widget.setting]]
-  key = "label"
-  type = "string"
-  label = "Label"
-  description = "Text shown in the bar."
-  default = "Up to date"
-
-  [[widget.setting]]
   key = "updated-glyph"
   type = "glyph"
   label = "Updated glyph"

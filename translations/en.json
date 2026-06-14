@@ -1,7 +1,10 @@
 {
-  "title": "Example",
-  "clicks": {
-    "one": "Clicked {count} time",
-    "other": "Clicked {count} times"
+  "dnfMissing": "Dnf is not installed",
+  "dnfMissingSub": "Dnf was not found in your system",
+  "updatedSystem": "Your system is up to date.",
+  "updatesAvailable": "Updates available",
+  "updates": {
+    "one": "There is {count} update available.",
+    "other": "There are {count} updates available."
   }
 }

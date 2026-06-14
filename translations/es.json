@@ -1,0 +1,10 @@
+{
+  "dnfMissing": "Dnf no está instalado",
+  "dnfMissingSub": "No se ha encontrado Dnf en tu sistema.",
+  "updatedSystem": "Tu sistema está actualizado.",
+  "updatesAvailable": "Actualizaciones disponibles",
+  "updates": {
+    "one": "Hay {count} actualización disponible.",
+    "other": "Hay {count} actualizaciones disponibles."
+  }
+}

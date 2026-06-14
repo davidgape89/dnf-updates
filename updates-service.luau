@@ -13,7 +13,7 @@ local hasShownNotification = false
 
 function update()
     if not noctalia.commandExists("dnf") then
-        noctalia.notify(noctalia.tr("DNF is not installed in your system"))
+        noctalia.notify(noctalia.tr("dnfMissing"), noctalia.tr("dnfMissingSub"))
         return
     end
 
@@ -28,7 +28,6 @@ function update()
         local packages: {[number]: {name: string, version: string, status: string}} = {}
         for line in string.gmatch(stdout.stdout, "[^\r\n]+") do
             if line == "Available upgrades" then
-                log("Skipped first line")
                 continue
             end
             local packageIterator = string.gmatch(line, "[^%s]+")
@@ -37,7 +36,7 @@ function update()
         noctalia.state.set("isUpdated", false)
         noctalia.state.set("updates", packages)
         if not hasShownNotification then
-            noctalia.notify(noctalia.tr("There are system updates available"))
+            noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #packages))
         end
         hasShownNotification = true
     end)

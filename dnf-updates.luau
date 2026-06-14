@@ -23,9 +23,10 @@ local function render()
     end
 
     if not updates then
-        barWidget.setTooltip("Your system is up to date.")
+        barWidget.setTooltip(noctalia.tr("updatedSystem"))
         else
-        barWidget.setTooltip(`There are {#updates} updates available.`)
+        -- barWidget.setTooltip(`There are {#updates} updates available.`)
+        barWidget.setTooltip(noctalia.trp("updates", #updates))
     end
 end
 

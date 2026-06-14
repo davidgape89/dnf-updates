@@ -13,7 +13,7 @@ echo "Disabling plugin"
 
 noctalia msg plugins disable $PLUGINOWNER/$PLUGIN_NAME
 
-echo -e "${GREEN}Starting deployment...${NC}"
+echo -e "${GREEN}Installing...${NC}"
 echo "-----------------------------------------------"
 
 if [ -d "$PLUGIN_PATH/$PLUGIN_NAME" ]; then
@@ -26,28 +26,15 @@ if [ -d "$PLUGIN_PATH/$PLUGIN_NAME" ]; then
 		exit 1
 	fi
 else
-	echo "Folder does not exist, proceeding with deployment."
+	echo "Folder does not exist, proceeding with installation."
 fi
 
 cd ../
 cp -r "${PLUGIN_NAME}" "${PLUGIN_PATH}"
 
 if [ $? -eq 0 ]; then
-	echo -e "${GREEN}[SUCCESS]${NC} Deployed the plugin successfully."
+	echo -e "${GREEN}[SUCCESS]${NC} Installed the plugin successfully."
 else
-	echo -e "${RED}[ERROR]${NC} There was a problem deploying the plugin."
+	echo -e "${RED}[ERROR]${NC} There was a problem installing the plugin."
 	exit 1
 fi
-
-echo -e "${GREEN}[SUCCESS]${NC} Plugin deployed successfully."
-
-# echo "Enabling plugin now..."
-
-# noctalia msg plugins enable $PLUGIN_OWNER/$PLUGIN_NAME
-
-# if [ $? -eq 0 ]; then
-#     echo -e "${GREEN}[SUCCESS]${NC} Plugin up and running."
-# else
-#     echo -e "${RED}[ERROR]${NC} There was a problem enabling the plugin."
-#     exit 1
-# fi

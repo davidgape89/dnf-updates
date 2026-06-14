@@ -1,4 +1,4 @@
-noctalia.setUpdateInterval(60000)
+noctalia.setUpdateInterval(5 * 60000)
 
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false

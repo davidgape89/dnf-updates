@@ -15,8 +15,12 @@ local function render()
         end
     end
 
-    if showLabel and not isUpdated then
-        barWidget.setText(#updates)
+    if showLabel then
+        if not isUpdated then
+            barWidget.setText(#updates)
+            else
+            barWidget.setText("")
+        end
     end
 
     if not updates then

@@ -39,12 +39,10 @@ function update()
     end)
 
     noctalia.runAsync("dnf needs-restarting", function(stdout:Stdout)
-        if stdout.exitCode > 0 then return end
-        local matches = string.gmatch(stdout.stdout, "Reboot should not be necessary.")
-        local firstMatch = matches()
-        if not firstMatch and not hasShownRestartNotification then
+        if stdout.exitCode > 0 and not hasShownRestartNotification then
             hasShownRestartNotification = true
             noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
+            noctalia.state.set("needsRestarting", true)
         end
     end)
 end

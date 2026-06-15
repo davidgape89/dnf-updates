@@ -27,6 +27,13 @@ entry = "dnf-updates.luau"
   default = "refresh-alert"
 
   [[widget.setting]]
+  key = "needs-restart-glyph"
+  type = "glyph"
+  label = "Needs restart glyph"
+  description = "Glyph shown before the label when system needs restart."
+  default = "refresh-dot"
+
+  [[widget.setting]]
   key = "show_glyph"
   type = "bool"
   label = "Show glyph"

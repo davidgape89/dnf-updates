@@ -1,12 +1,30 @@
 id = "davidgape89/dnf-updates"
 name = "DNF updates"
-version = "0.0.1"
+version = "0.0.2"
 min_noctalia = "5.0.0"
 author = "davidgape89"
 license = "MIT"
 tags = ["dnf", "updates", "fedora"]
 icon = "refresh"
 description = "A plugin that checks if there are any software updates available."
+
+[[setting]]
+key = "cache_refresh"
+type = "int"
+label = "Cache refresh interval"
+description = "Cache refresh time in minutes"
+default = 5
+min = 1
+max = 60
+
+[[setting]]
+key = "service_refresh"
+type = "int"
+label = "Service refresh interval"
+description = "Service refresh time in minutes"
+default = 1
+min = 1
+max = 60
 
 [[widget]]
 id = "dnf-updates"

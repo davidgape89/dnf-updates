@@ -22,24 +22,18 @@ function log(msg)
     noctalia.writeFile(logsPath, logsContent .. newLog)
 end
 
-function handleNeedsRestarting(stdout: Stdout)
-    if stdout.exitCode > 0 and not hasShownRestartNotification then
-        hasShownRestartNotification = true
-        noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
-        noctalia.state.set("needsRestarting", true)
-    end
-end
-
--- If regular needs restarting does not work, this is an option too
 function handleNeedsRestartingStream(line)
     if line == "Reboot is required to fully utilize these updates." then
-        hasShownRestartNotification = true
-        noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
+        if not hasShownRestartNotification then
+            noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
+            hasShownRestartNotification = true
+        end
         noctalia.state.set("needsRestarting", true)
     end
 end
 
 function handleUpgrades(stdout: Stdout)
+    log('handling upgrades')
     if stdout.exitCode ~= 100 and stdout.exitCode > 0 then
         log(stdout.stderr)
         return
@@ -71,15 +65,11 @@ function checkUpgrades()
     noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades)
 end
 
-function checkNeedsRestarting()
-    noctalia.runStream("dnf needs-restarting -C -q", handleNeedsRestartingStream)
-end
-
-function handleCacheDone(line: string)
-    if line == "Metadata cache created." then
-        log('Cache created, running other commands')
-        checkUpgrades()
-        checkNeedsRestarting()
+function checkNeedsRestarting(withCache: boolean)
+    if withCache then
+        noctalia.runStream("dnf needs-restarting -C", handleNeedsRestartingStream)
+        else
+        noctalia.runStream("dnf needs-restarting", handleNeedsRestartingStream)
     end
 end
 
@@ -90,16 +80,15 @@ function update()
         return
     end
     if serviceUpdates * serviceRefreshTime > cacheRefreshTime then
-        log('Refreshing cache...')
-        noctalia.runStream("dnf --refresh makecache", handleCacheDone)
+        checkNeedsRestarting(false)
+        checkUpgrades()
         serviceUpdates = 0
         else
-        log('Checking upgrades...')
+        checkNeedsRestarting(true)
         checkUpgrades()
-        -- Needs restarting seems to randomly fail when used with -C
-        -- checkNeedsRestarting()
     end
 end
+
 
 -- function onIpc(event, payload)
 --     noctalia.notify(noctalia.tr("Received message:"), noctalia.tr(event))

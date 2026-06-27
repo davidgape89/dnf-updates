@@ -1,12 +1,13 @@
 id = "davidgape89/dnf-updates"
 name = "DNF updates"
-version = "0.0.2"
+version = "0.0.3"
 min_noctalia = "5.0.0"
 author = "davidgape89"
 license = "MIT"
 tags = ["dnf", "updates", "fedora"]
 icon = "refresh"
 description = "A plugin that checks if there are any software updates available."
+dependencies = ["dnf"]
 
 [[setting]]
 key = "cache_refresh"

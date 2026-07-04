@@ -15,13 +15,6 @@ type Stdout = {
     timedOut: boolean,
 }
 
-function log(msg)
-    local logsPath = noctalia.pluginDir() .. "/dnf_logs"
-    local logsContent = noctalia.readFile(logsPath) or ""
-    local newLog = `[ {os.date()} ]: {msg}\n`
-    noctalia.writeFile(logsPath, logsContent .. newLog)
-end
-
 function handleNeedsRestartingStream(line)
     if line == "Reboot is required to fully utilize these updates." then
         if not hasShownRestartNotification then
@@ -33,9 +26,7 @@ function handleNeedsRestartingStream(line)
 end
 
 function handleUpgrades(stdout: Stdout)
-    log('handling upgrades')
     if stdout.exitCode ~= 100 and stdout.exitCode > 0 then
-        log(stdout.stderr)
         return
     end
 
@@ -69,7 +60,7 @@ function checkNeedsRestarting(withCache: boolean)
     if withCache then
         noctalia.runStream("dnf needs-restarting -C", handleNeedsRestartingStream)
         else
-        noctalia.runStream("dnf needs-restarting", handleNeedsRestartingStream)
+        noctalia.runStream("dnf needs-restarting --refresh", handleNeedsRestartingStream)
     end
 end
 

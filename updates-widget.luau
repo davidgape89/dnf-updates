@@ -1,8 +1,8 @@
-local updatedGlyph = barWidget.getConfig("updated-glyph")
-local notUpdatedGlyph = barWidget.getConfig("not-updated-glyph")
-local needsRestartGlyph = barWidget.getConfig("needs-restart-glyph")
-local showGlyph = barWidget.getConfig("show_glyph")
-local showLabel = barWidget.getConfig("show_label")
+local updatedGlyph = noctalia.getConfig("updated-glyph")
+local notUpdatedGlyph = noctalia.getConfig("not-updated-glyph")
+local needsRestartGlyph = noctalia.getConfig("needs-restart-glyph")
+local showGlyph = noctalia.getConfig("show_glyph")
+local showLabel = noctalia.getConfig("show_label")
 
 local isUpdated = true
 local updates = nil
@@ -23,7 +23,7 @@ local function render()
 
     if showLabel then
         if not isUpdated then
-            barWidget.setText(#updates)
+            barWidget.setText(tostring(#updates))
             else
             barWidget.setText("")
         end
@@ -41,8 +41,12 @@ local function render()
 end
 
 function update()
-  noctalia.setUpdateInterval(1000)
-  render()
+    noctalia.setUpdateInterval(1000)
+    render()
+end
+
+function onClick()
+    noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
 end
 
 noctalia.state.watch("isUpdated", function(value: boolean)
@@ -50,7 +54,7 @@ noctalia.state.watch("isUpdated", function(value: boolean)
     render()
 end)
 
-noctalia.state.watch("updates", function(value: string)
+noctalia.state.watch("updates", function(value: {[number]: {name: string, version: string, status: string}})
     updates = value
     render()
 end)

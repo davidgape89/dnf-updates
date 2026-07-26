@@ -8,5 +8,31 @@
   "updates": {
     "one": "There is {count} update available.",
     "other": "There are {count} updates available."
+  },
+  "cacheRefresh": {
+    "label": "Cache refresh interval",
+    "description": "Cache refresh time in minutes"
+  },
+  "serviceRefresh": {
+    "label": "Service refresh interval",
+    "description": "Service refresh time in minutes"
+  },
+  "updatedGlyph": {
+    "label": "Updated glyph",
+    "description": "Glyph shown before the label when system updated"
+  },
+  "notUpdatedGlyph": {
+    "label": "Not updated glyph",
+    "description": "Glyph shown before the label when system not updated"
+  },
+  "needsRestartGlyph": {
+    "label": "Needs restart glyph",
+    "description": "Glyph shown before the label when system needs restart"
+  },
+  "showGlyph": {
+    "label": "Glyph toggle"
+  },
+  "showLabel": {
+    "label": "Show label"
   }
 }

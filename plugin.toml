@@ -1,19 +1,19 @@
 id = "davidgape89/dnf-updates"
-name = "DNF updates"
+name = "Dnf Updates"
 version = "0.0.3"
+plugin_api = 3
 min_noctalia = "5.0.0"
 author = "davidgape89"
-license = "MIT"
-tags = ["dnf", "updates", "fedora"]
 icon = "refresh"
 description = "A plugin that checks if there are any software updates available."
 dependencies = ["dnf"]
+tags = ["dnf", "updates", "fedora"]
 
 [[setting]]
 key = "cache_refresh"
 type = "int"
-label = "Cache refresh interval"
-description = "Cache refresh time in minutes"
+label_key = "cacheRefresh.label"
+description_key = "cacheRefresh.description"
 default = 5
 min = 1
 max = 60
@@ -21,49 +21,54 @@ max = 60
 [[setting]]
 key = "service_refresh"
 type = "int"
-label = "Service refresh interval"
-description = "Service refresh time in minutes"
+label_key = "serviceRefresh.label"
+description_key = "serviceRefresh.description"
 default = 1
 min = 1
 max = 60
 
 [[widget]]
-id = "dnf-updates"
-entry = "dnf-updates.luau"
+id = "updates-widget"
+entry = "updates-widget.luau"
 
   [[widget.setting]]
   key = "updated-glyph"
   type = "glyph"
-  label = "Updated glyph"
-  description = "Glyph shown before the label when system updated."
+  label_key = "updatedGlyph.label"
+  description_key = "updatedGlyph.description"
   default = "refresh"
 
   [[widget.setting]]
   key = "not-updated-glyph"
   type = "glyph"
-  label = "Not updated glyph"
-  description = "Glyph shown before the label when system not updated."
+  label_key = "notUpdatedGlyph.label"
+  description_key = "notUpdatedGlyph.description"
   default = "refresh-alert"
 
   [[widget.setting]]
   key = "needs-restart-glyph"
   type = "glyph"
-  label = "Needs restart glyph"
-  description = "Glyph shown before the label when system needs restart."
+  label_key = "needsRestartGlyph.label"
+  description_key = "needsRestartGlyph.description"
   default = "refresh-dot"
 
   [[widget.setting]]
   key = "show_glyph"
   type = "bool"
-  label = "Show glyph"
+  label_key = "showGlyph.label"
   default = true
 
   [[widget.setting]]
   key = "show_label"
   type = "bool"
-  label = "Show label"
+  label_key = "showLabel.label"
   default = true
 
 [[service]]
 id = "updates-service"
 entry = "updates-service.luau"
+
+[[panel]]
+id = "updates-panel"
+entry = "updates-panel.luau"
+placement = "attached"

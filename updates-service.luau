@@ -1,11 +1,18 @@
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local cacheRefreshTime = noctalia.getConfig("cache_refresh")
--- Setting it to the same as the cache so it runs on boot
+-- Setting it to the same as the cache so it runs on start
 local serviceUpdates = noctalia.getConfig("cache_refresh")
 local serviceRefreshTime = noctalia.getConfig("service_refresh")
 
 noctalia.setUpdateInterval(serviceRefreshTime * 60000)
+
+function log(msg)
+    local logsPath = noctalia.pluginDir() .. "/dnf_logs"
+    local logsContent = noctalia.readFile(logsPath) or ""
+    local newLog = `[ {os.date()} ]: {msg}\n`
+    noctalia.writeFile(logsPath, logsContent .. newLog)
+end
 
 type Stdout = {
     exitCode: number,
@@ -22,6 +29,12 @@ function handleNeedsRestartingStream(line)
             hasShownRestartNotification = true
         end
         noctalia.state.set("needsRestarting", true)
+    end
+end
+
+function handleRefreshRepositories(line)
+    if line == "Available upgrades" then
+        checkUpgrades()
     end
 end
 
@@ -56,12 +69,12 @@ function checkUpgrades()
     noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades)
 end
 
-function checkNeedsRestarting(withCache: boolean)
-    if withCache then
-        noctalia.runStream("dnf needs-restarting -C", handleNeedsRestartingStream)
-        else
-        noctalia.runStream("dnf needs-restarting --refresh", handleNeedsRestartingStream)
-    end
+function checkNeedsRestarting()
+    noctalia.runStream("dnf needs-restarting -C --color=never", handleNeedsRestartingStream)
+end
+
+function refreshRepositories()
+    noctalia.runStream("dnf --refresh list --upgrades --color=never", handleRefreshRepositories)
 end
 
 function update()
@@ -71,13 +84,12 @@ function update()
         return
     end
     if serviceUpdates * serviceRefreshTime > cacheRefreshTime then
-        checkNeedsRestarting(false)
-        checkUpgrades()
+        refreshRepositories()
         serviceUpdates = 0
         else
-        checkNeedsRestarting(true)
         checkUpgrades()
     end
+    checkNeedsRestarting()
 end
 
 

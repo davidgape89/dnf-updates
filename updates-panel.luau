@@ -7,28 +7,51 @@ function log(msg)
     noctalia.writeFile(logsPath, logsContent .. newLog)
 end
 
+local function upgrade()
+    noctalia.runInTerminal("sudo dnf upgrade --refresh; read -p \"Press Enter to continue...\"")
+    panel.close()
+end
+
 local function render()
     log('rendering panel')
     local labelText = noctalia.trp("updates", #packages)
     local updateRows: {UiNode} = {}
     for index, package in ipairs(packages) do
-        local packageUI: UiNode = ui.row({align = "center", justify = "space_between"}, {
-            ui.label({ text = package.name }),
+        local packageRow: UiNode = ui.row({align = "center", justify = "space_between"}, {
+            ui.row({}, {
+                ui.glyph({name = "arrow-bar-up", fontSize = 8}),
+                ui.box({width = 8, height = 8, opacity = 0}),
+                ui.label({ text = package.name })
+            }),            
             ui.label({ text = package.version })
         })
-        table.insert(updateRows, packageUI)
+        table.insert(updateRows, packageRow)
     end
-    log(updateRows)
-    panel.render(ui.scroll({ gap = 8 }, {
-        ui.row({ align = "center", justify = "space_between" }, {
+    panel.render(ui.column({
+        gap = 8,
+        flexGrow = 1
+    }, {
+        ui.row({
+            align = "center",
+            justify = "space_between"
+        }, {
             ui.column({ align = "start" }, {
                 ui.label({ text = "Upgrades available", fontSize = 16, fontWeight = "bold" }),
                 ui.label({ text = labelText })
             }),            
-            #packages > 0 and ui.button({ text = "Upgrade", glyph = "refresh" }) or nil
+            #packages > 0 and ui.button({
+                text = "Upgrade",
+                glyph = "refresh",
+                onClick = upgrade
+            }) or nil
         }),
-        ui.scroll({gap = 8}, updateRows)
-        -- table.unpack(updateRows)
+        #packages > 0 and ui.scroll({
+            border = "outline",
+            flexGrow = 1,
+            gap = 16,
+            radius = 8,
+            padding = 16
+        }, updateRows) or nil
     }))
 end
 
@@ -36,19 +59,12 @@ function onOpen(context)
     render()
 end
 
-function onCloseClicked()
-    panel.close()
-end
-
 function update()
-    log('panel update function')
-    noctalia.setUpdateInterval(1000)
+    noctalia.setUpdateInterval(5000)
     render()
 end
 
 noctalia.state.watch("updates", function(value: {[number]: {name: string, version: string, status: string}})
-    log('received update')
-    log(#value)
     packages = value
     render()
 end)

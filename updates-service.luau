@@ -1,11 +1,8 @@
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local cacheRefreshTime = noctalia.getConfig("cache_refresh")
--- Setting it to the same as the cache so it runs on start
-local serviceUpdates = noctalia.getConfig("cache_refresh")
-local serviceRefreshTime = noctalia.getConfig("service_refresh")
 
-noctalia.setUpdateInterval(serviceRefreshTime * 60000)
+noctalia.setUpdateInterval(cacheRefreshTime * 60000)
 
 function log(msg)
     local logsPath = noctalia.pluginDir() .. "/dnf_logs"
@@ -33,19 +30,16 @@ function handleNeedsRestartingStream(line)
 end
 
 function handleRefreshRepositories(line)
-    if line == "Available upgrades" then
+    if line == "Metadata cache created." then
         checkUpgrades()
     end
 end
 
 function handleUpgrades(stdout: Stdout)
-    if stdout.exitCode ~= 100 and stdout.exitCode > 0 then
-        return
-    end
-
-    if stdout.exitCode == 0 then
+    if stdout.stdout == "" then
+        log('inside if')
         noctalia.state.set("isUpdated", true)
-        noctalia.state.set("updates", nil)
+        noctalia.state.set("updates", {})
         return
     end
 
@@ -74,25 +68,15 @@ function checkNeedsRestarting()
 end
 
 function refreshRepositories()
-    noctalia.runStream("dnf --refresh list --upgrades --color=never", handleRefreshRepositories)
+    noctalia.runStream("dnf --refresh makecache --color=never", handleRefreshRepositories)
 end
 
 function update()
-    serviceUpdates = serviceUpdates + 1
     if not noctalia.commandExists("dnf") then
         noctalia.notify(noctalia.tr("dnfMissing"), noctalia.tr("dnfMissingSub"))
         return
     end
-    if serviceUpdates * serviceRefreshTime > cacheRefreshTime then
-        refreshRepositories()
-        serviceUpdates = 0
-        else
-        checkUpgrades()
-    end
+
+    refreshRepositories()
     checkNeedsRestarting()
 end
-
-
--- function onIpc(event, payload)
---     noctalia.notify(noctalia.tr("Received message:"), noctalia.tr(event))
--- end

@@ -18,15 +18,6 @@ default = 5
 min = 1
 max = 60
 
-[[setting]]
-key = "service_refresh"
-type = "int"
-label_key = "serviceRefresh.label"
-description_key = "serviceRefresh.description"
-default = 1
-min = 1
-max = 60
-
 [[widget]]
 id = "updates-widget"
 entry = "updates-widget.luau"

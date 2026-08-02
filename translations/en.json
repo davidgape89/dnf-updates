@@ -6,16 +6,12 @@
   "rebootNecessary": "Reboot necessary",
   "rebootNecessarySub": "Rebooting the system is required",
   "updates": {
-    "one": "There is {count} update available.",
-    "other": "There are {count} updates available."
+    "one": "{count} update available.",
+    "other": "{count} updates available."
   },
   "cacheRefresh": {
     "label": "Cache refresh interval",
     "description": "Cache refresh time in minutes"
-  },
-  "serviceRefresh": {
-    "label": "Service refresh interval",
-    "description": "Service refresh time in minutes"
   },
   "updatedGlyph": {
     "label": "Updated glyph",

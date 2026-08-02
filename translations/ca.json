@@ -6,7 +6,29 @@
   "rebootNecessary": "Reinici necessari",
   "rebootNecessarySub": "Es necessita reiniciar el sistema",
   "updates": {
-    "one": "Hi ha {count} actualització disponible.",
-    "other": "Hi ha {count} actualitzacions disponibles."
+    "one": "{count} actualització disponible.",
+    "other": "{count} actualitzacions disponibles."
+  },
+  "cacheRefresh": {
+    "label": "Interval de refresc del repositori d'actualitzacions",
+    "description": "Interval de refresc del repositori d'actualitzacions en minuts"
+  },
+  "updatedGlyph": {
+    "label": "Icona de sistema actualitzat",
+    "description": "Icona que es mostra quan el sistema està actualitzat"
+  },
+  "notUpdatedGlyph": {
+    "label": "Icona de sistema desactualitzat",
+    "description": "Icona que es mostra quan el sistema no està actualitzat"
+  },
+  "needsRestartGlyph": {
+    "label": "Icona de reinici necessari",
+    "description": "Icona que es mostra quan el sistema es necessita reiniciar"
+  },
+  "showGlyph": {
+    "label": "Mostrar icona"
+  },
+  "showLabel": {
+    "label": "Mostrar text"
   }
 }

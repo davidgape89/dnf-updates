@@ -1,15 +1,9 @@
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local cacheRefreshTime = noctalia.getConfig("cache_refresh")
+local minutesElapsed = 0
 
-noctalia.setUpdateInterval(cacheRefreshTime * 60000)
-
-function log(msg)
-    local logsPath = noctalia.pluginDir() .. "/dnf_logs"
-    local logsContent = noctalia.readFile(logsPath) or ""
-    local newLog = `[ {os.date()} ]: {msg}\n`
-    noctalia.writeFile(logsPath, logsContent .. newLog)
-end
+noctalia.setUpdateInterval(60000)
 
 type Stdout = {
     exitCode: number,
@@ -19,14 +13,46 @@ type Stdout = {
     timedOut: boolean,
 }
 
-function handleNeedsRestartingStream(line)
-    if line == "Reboot is required to fully utilize these updates." then
-        if not hasShownRestartNotification then
-            noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
-            hasShownRestartNotification = true
-        end
-        noctalia.state.set("needsRestarting", true)
+type UpdateState = {
+    isUpdated: boolean,
+    needsRestart: boolean,
+    updates: {[number]: {name: string, version: string, status: string}},
+} 
+
+local updateState: UpdateState = {
+    isUpdated = true,
+    needsRestart = false,
+    updates = {},
+}
+
+function handleUpgrades(stdout: Stdout)
+    if stdout.stdout == "" then
+        updateState.isUpdated = true
+        updateState.updates = {}
+        noctalia.state.set("updateState", updateState)
+        return
     end
+
+    updateState.updates = {}
+    for line in string.gmatch(stdout.stdout, "[^\r\n]+") do
+        if line == "Upgrades" then
+            continue
+        end
+        local packageIterator = string.gmatch(line, "[^%s]+")
+        table.insert(updateState.updates, {name = packageIterator(), version = packageIterator(), status = packageIterator()})
+    end
+
+    if not hasShownUpdateNotification then
+        noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #updateState.updates))
+    end
+
+    hasShownUpdateNotification = true
+    updateState.isUpdated = false
+    noctalia.state.set("updateState", updateState)
+end
+
+function checkUpgrades()
+    noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades)
 end
 
 function handleRefreshRepositories(line)
@@ -35,41 +61,26 @@ function handleRefreshRepositories(line)
     end
 end
 
-function handleUpgrades(stdout: Stdout)
-    if stdout.stdout == "" then
-        log('inside if')
-        noctalia.state.set("isUpdated", true)
-        noctalia.state.set("updates", {})
-        return
-    end
-
-    local packages: {[number]: {name: string, version: string, status: string}} = {}
-    for line in string.gmatch(stdout.stdout, "[^\r\n]+") do
-        if line == "Upgrades" then
-            continue
-        end
-        local packageIterator = string.gmatch(line, "[^%s]+")
-        table.insert(packages, {name = packageIterator(), version = packageIterator(), status = packageIterator()})
-    end
-    noctalia.state.set("isUpdated", false)
-    noctalia.state.set("updates", packages)
-    if not hasShownUpdateNotification then
-        noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #packages))
-    end
-    hasShownUpdateNotification = true
+function refreshRepositories()
+    noctalia.runStream("dnf --refresh makecache --color=never", handleRefreshRepositories)
 end
 
-function checkUpgrades()
-    noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades)
+function handleNeedsRestartingStream(line)
+    if line == "Reboot is required to fully utilize these updates." then
+        if not hasShownRestartNotification then
+            noctalia.notify(noctalia.tr("rebootNecessary"), noctalia.tr("rebootNecessarySub"))
+            hasShownRestartNotification = true
+        end
+        updateState.needsRestart = true
+        noctalia.state.set("updateState", updateState)
+    end
 end
 
 function checkNeedsRestarting()
     noctalia.runStream("dnf needs-restarting -C --color=never", handleNeedsRestartingStream)
 end
 
-function refreshRepositories()
-    noctalia.runStream("dnf --refresh makecache --color=never", handleRefreshRepositories)
-end
+
 
 function update()
     if not noctalia.commandExists("dnf") then
@@ -77,6 +88,12 @@ function update()
         return
     end
 
-    refreshRepositories()
-    checkNeedsRestarting()
+    if math.fmod(minutesElapsed, cacheRefreshTime) == 0 then
+        refreshRepositories()
+        checkNeedsRestarting()
+    else
+        checkUpgrades()
+    end
+
+    minutesElapsed = minutesElapsed + 1
 end

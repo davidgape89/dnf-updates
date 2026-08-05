@@ -4,14 +4,24 @@ local needsRestartGlyph = noctalia.getConfig("needs-restart-glyph")
 local showGlyph = noctalia.getConfig("show_glyph")
 local showLabel = noctalia.getConfig("show_label")
 
-local isUpdated = true
-local updates = nil
-local needsRestarting = false
+noctalia.setUpdateInterval(1000)
+
+type UpdateState = {
+    isUpdated: boolean,
+    needsRestart: boolean,
+    updates: {[number]: {name: string, version: string, status: string}},
+} 
+
+local updateState: UpdateState = {
+    isUpdated = true,
+    needsRestart = false,
+    updates = {},
+}
 
 local function render()
     if showGlyph then
-        if isUpdated then
-            if needsRestarting then
+        if updateState.isUpdated then
+            if updateState.needsRestart then
                 barWidget.setGlyph(needsRestartGlyph)
                 else
                 barWidget.setGlyph(updatedGlyph)
@@ -22,26 +32,25 @@ local function render()
     end
 
     if showLabel then
-        if not isUpdated then
-            barWidget.setText(tostring(#updates))
+        if not updateState.isUpdated then
+            barWidget.setText(tostring(#updateState.updates))
             else
             barWidget.setText("")
         end
     end
 
-    if not updates then
-        if needsRestarting then
+    if not updateState.updates then
+        if updateState.needsRestart then
             barWidget.setTooltip(noctalia.tr("rebootNecessary"))
             else
             barWidget.setTooltip(noctalia.tr("updatedSystem"))
         end
         else
-        barWidget.setTooltip(noctalia.trp("updates", #updates))
+        barWidget.setTooltip(noctalia.trp("updates", #updateState.updates))
     end
 end
 
 function update()
-    noctalia.setUpdateInterval(1000)
     render()
 end
 
@@ -49,17 +58,6 @@ function onClick()
     noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
 end
 
-noctalia.state.watch("isUpdated", function(value: boolean)
-    isUpdated = value
-    render()
-end)
-
-noctalia.state.watch("updates", function(value: {[number]: {name: string, version: string, status: string}})
-    updates = value
-    render()
-end)
-
-noctalia.state.watch("needsRestarting", function(value: boolean)
-    needsRestarting = value
-    render()
+noctalia.state.watch("updateState", function(value: UpdateState)
+    updateState = value
 end)

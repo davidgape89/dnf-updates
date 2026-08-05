@@ -1,7 +1,7 @@
 {
   "dnfMissing": "Dnf no està instal·lat",
-  "dnfMissingSub": "No s'ha trobat dnf al sistema.",
-  "updatedSystem": "El vostre sistema està actualitzat.",
+  "dnfMissingSub": "No s'ha trobat dnf al sistema",
+  "updatedSystem": "El vostre sistema està actualitzat",
   "updatesAvailable": "Actualizacions disponibles",
   "rebootNecessary": "Reinici necessari",
   "rebootNecessarySub": "Es necessita reiniciar el sistema",

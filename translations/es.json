@@ -1,13 +1,13 @@
 {
   "dnfMissing": "Dnf no está instalado",
-  "dnfMissingSub": "No se ha encontrado Dnf en tu sistema.",
-  "updatedSystem": "Tu sistema está actualizado.",
+  "dnfMissingSub": "No se ha encontrado Dnf en tu sistema",
+  "updatedSystem": "Tu sistema está actualizado",
   "updatesAvailable": "Actualizaciones disponibles",
   "rebootNecessary": "Reinicio necesario",
   "rebootNecessarySub": "Es necesario reiniciar el sistema",
   "updates": {
-    "one": "{count} actualización disponible.",
-    "other": "{count} actualizaciones disponibles."
+    "one": "{count} actualización disponible",
+    "other": "{count} actualizaciones disponibles"
   },
   "cacheRefresh": {
     "label": "Intervalo de refresco del repositorio d'actualizaciones",

@@ -1,13 +1,13 @@
 {
   "dnfMissing": "Dnf is not installed",
   "dnfMissingSub": "Dnf was not found in your system",
-  "updatedSystem": "Your system is up to date.",
+  "updatedSystem": "Your system is up to date",
   "updatesAvailable": "Updates available",
   "rebootNecessary": "Reboot necessary",
   "rebootNecessarySub": "Rebooting the system is required",
   "updates": {
-    "one": "{count} update available.",
-    "other": "{count} updates available."
+    "one": "{count} update available",
+    "other": "{count} updates available"
   },
   "cacheRefresh": {
     "label": "Cache refresh interval",

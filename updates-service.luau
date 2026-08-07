@@ -5,20 +5,6 @@ local minutesElapsed = 0
 
 noctalia.setUpdateInterval(60000)
 
-type Stdout = {
-    exitCode: number,
-    stdout: string,
-    stderr: string,
-    stderrTruncated: boolean,
-    timedOut: boolean,
-}
-
-type UpdateState = {
-    isUpdated: boolean,
-    needsRestart: boolean,
-    updates: {[number]: {name: string, version: string, status: string}},
-} 
-
 local updateState: UpdateState = {
     isUpdated = true,
     needsRestart = false,
@@ -40,7 +26,7 @@ function checkNeedsRestarting()
     noctalia.runStream("dnf needs-restarting -C --color=never", handleNeedsRestartingStream)
 end
 
-function handleUpgrades(stdout: Stdout)
+function handleUpgrades(stdout: CommandResult)
     if stdout.stdout == "" then
         updateState.isUpdated = true
         updateState.updates = {}

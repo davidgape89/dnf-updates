@@ -6,12 +6,6 @@ local showLabel = noctalia.getConfig("show_label")
 
 noctalia.setUpdateInterval(1000)
 
-type UpdateState = {
-    isUpdated: boolean,
-    needsRestart: boolean,
-    updates: {[number]: {name: string, version: string, status: string}},
-} 
-
 local updateState: UpdateState = {
     isUpdated = true,
     needsRestart = false,

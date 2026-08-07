@@ -3,7 +3,7 @@
     "luau-lsp.platform.type": "standard",
     "luau-lsp.sourcemap.enabled": false,
     "luau-lsp.types.definitionFiles": {
-        "noctalia": "noctalia.d.luau"
+        "noctalia": "noctalia.d.luau",
+        "updates": "updates.d.luau"
     },
-    "luau-lsp.ignoreGlobs": ["**/*.d.luau"]
 }

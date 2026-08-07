@@ -9,6 +9,8 @@ local updateState: UpdateState = {
     updates = {},
 }
 
+noctalia.setUpdateInterval(1000)
+
 local function upgrade()
     noctalia.runInTerminal("sudo dnf upgrade --refresh; read -p \"Press Enter to continue...\"")
     panel.close()
@@ -58,6 +60,10 @@ local function render()
 end
 
 function onOpen(context)
+    render()
+end
+
+function update()
     render()
 end
 

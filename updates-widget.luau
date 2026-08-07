@@ -55,7 +55,9 @@ function update()
 end
 
 function onClick()
-    noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
+    if not updateState.isUpdated then
+        noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
+    end
 end
 
 noctalia.state.watch("updateState", function(value: UpdateState)

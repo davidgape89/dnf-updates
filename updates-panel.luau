@@ -1,10 +1,8 @@
-local updateState: UpdateState = {
+local panelState: UpdateState = {
     isUpdated = true,
     needsRestart = false,
     updates = {},
 }
-
-noctalia.setUpdateInterval(1000)
 
 local function upgrade()
     noctalia.runInTerminal("sudo dnf upgrade --refresh; read -p \"Press Enter to continue...\"")
@@ -12,9 +10,10 @@ local function upgrade()
 end
 
 local function render()
-    local labelText = noctalia.trp("updates", #updateState.updates)
+    panelState = noctalia.state.get("updateState")
+    local labelText = noctalia.trp("updates", #panelState.updates)
     local updateRows: {UiNode} = {}
-    for index, package in ipairs(updateState.updates) do
+    for index, package in ipairs(panelState.updates) do
         local packageRow: UiNode = ui.row({align = "center", justify = "space_between"}, {
             ui.row({}, {
                 ui.glyph({name = "arrow-bar-up", fontSize = 8}),
@@ -38,13 +37,14 @@ local function render()
                 ui.label({ text = "Upgrades available", fontSize = 16, fontWeight = "bold" }),
                 ui.label({ text = labelText })
             }),            
-            #updateState.updates > 0 and ui.button({
+            #panelState.updates > 0 and ui.button({
                 text = "Upgrade",
+                color = "primary",
                 glyph = "refresh",
                 onClick = upgrade
             }) or nil
         }),
-        #updateState.updates > 0 and ui.scroll({
+        #panelState.updates > 0 and ui.scroll({
             border = "outline",
             flexGrow = 1,
             gap = 16,
@@ -58,10 +58,10 @@ function onOpen(context)
     render()
 end
 
-function update()
-    render()
-end
-
-noctalia.state.watch("updateState", function(value: UpdateState)
-    updateState = value
-end)
+-- TODO - This doesn't seem to update as fast as it does for the widget
+-- not sure why
+-- noctalia.state.watch("updateState", function(value: UpdateState)
+--     log("Received value in panel")
+--     panelState = value
+--     render()
+-- end)

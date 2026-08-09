@@ -16,7 +16,7 @@ local function render()
     for index, package in ipairs(panelState.updates) do
         local packageRow: UiNode = ui.row({align = "center", justify = "space_between"}, {
             ui.row({}, {
-                ui.glyph({name = "arrow-bar-up", fontSize = 8}),
+                ui.glyph({name = "arrow-bar-up"}),
                 ui.box({width = 8, height = 8, opacity = 0}),
                 ui.label({ text = package.name })
             }),            
@@ -39,7 +39,6 @@ local function render()
             }),            
             #panelState.updates > 0 and ui.button({
                 text = "Upgrade",
-                color = "primary",
                 glyph = "refresh",
                 onClick = upgrade
             }) or nil

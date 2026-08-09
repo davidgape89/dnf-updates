@@ -2,6 +2,7 @@ local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local cacheRefreshTime = noctalia.getConfig("cache_refresh")
 local minutesElapsed = 0
+local statePath = noctalia.pluginDataDir() .. "/last-state.json"
 
 noctalia.setUpdateInterval(60000)
 
@@ -10,6 +11,19 @@ local updateState: UpdateState = {
     needsRestart = false,
     updates = {},
 }
+
+function storeState(state: UpdateState)
+    noctalia.writeFile(statePath, noctalia.json.encode(state) or "")
+end
+
+function restoreState()
+    local raw = noctalia.readFile(statePath)
+
+    if raw then
+        return noctalia.json.decode(raw)
+    end
+    return updateState
+end
 
 function handleNeedsRestartingStream(line)
     if line == "Reboot is required to fully utilize these updates." then
@@ -26,11 +40,16 @@ function checkNeedsRestarting()
     noctalia.runStream("dnf needs-restarting -C --color=never", handleNeedsRestartingStream)
 end
 
+function publishState(state: UpdateState)
+    noctalia.state.set("updateState", updateState)
+    storeState(state)
+end
+
 function handleUpgrades(stdout: CommandResult)
     if stdout.stdout == "" then
         updateState.isUpdated = true
         updateState.updates = {}
-        noctalia.state.set("updateState", updateState)
+        publishState(updateState)
         checkNeedsRestarting()
         return
     end
@@ -50,7 +69,7 @@ function handleUpgrades(stdout: CommandResult)
 
     hasShownUpdateNotification = true
     updateState.isUpdated = false
-    noctalia.state.set("updateState", updateState)
+    publishState(updateState)
     checkNeedsRestarting()
 end
 
@@ -80,5 +99,7 @@ function update()
         checkUpgrades()
     end
 
+    updateState = restoreState()
+    publishState(updateState)
     minutesElapsed = minutesElapsed + 1
 end

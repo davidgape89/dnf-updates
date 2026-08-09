@@ -2,7 +2,8 @@ local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local cacheRefreshTime = noctalia.getConfig("cache_refresh")
 local minutesElapsed = 0
-local statePath = noctalia.pluginDataDir() .. "/last-state.json"
+local pluginDataDir = noctalia.pluginDataDir()
+local statePath = pluginDataDir .. "/last-state.json"
 
 noctalia.setUpdateInterval(60000)
 
@@ -52,6 +53,7 @@ function handleUpgrades(stdout: CommandResult)
         publishState(updateState)
         checkNeedsRestarting()
         return
+
     end
 
     updateState.updates = {}

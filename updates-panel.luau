@@ -10,10 +10,11 @@ local function upgrade()
 end
 
 local function render()
-    panelState = noctalia.state.get("updateState")
-    local labelText = noctalia.trp("updates", #panelState.updates)
+    local current = noctalia.state.get("updateState") or { isUpdated = true, needsRestart = false, updates = {} }
+    local updates = current.updates or {}
+    local labelText = noctalia.trp("updates", #updates)
     local updateRows: {UiNode} = {}
-    for index, package in ipairs(panelState.updates) do
+    for index, package in ipairs(updates) do
         local packageRow: UiNode = ui.row({align = "center", justify = "space_between"}, {
             ui.row({}, {
                 ui.glyph({name = "arrow-bar-up"}),
@@ -37,13 +38,13 @@ local function render()
                 ui.label({ text = "Upgrades available", fontSize = 16, fontWeight = "bold" }),
                 ui.label({ text = labelText })
             }),            
-            #panelState.updates > 0 and ui.button({
+            #updates > 0 and ui.button({
                 text = "Upgrade",
                 glyph = "refresh",
                 onClick = upgrade
             }) or nil
         }),
-        #panelState.updates > 0 and ui.scroll({
+        #updates > 0 and ui.scroll({
             border = "outline",
             flexGrow = 1,
             gap = 16,

@@ -1,8 +1,14 @@
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
-local cacheRefreshTime = noctalia.getConfig("cache_refresh")
+local firstRun = true
+local cacheRefreshTime = tonumber(noctalia.getConfig("cache_refresh")) or 5
 local minutesElapsed = 0
-local pluginDataDir = noctalia.pluginDataDir()
+local pluginDataDir, _ = noctalia.pluginDataDir()
+if not pluginDataDir then
+    pluginDataDir = noctalia.pluginDir() or "."
+end
+-- Ensure the data directory exists
+noctalia.mkdirAll(pluginDataDir)
 local statePath = pluginDataDir .. "/last-state.json"
 
 noctalia.setUpdateInterval(60000)
@@ -14,14 +20,26 @@ local updateState: UpdateState = {
 }
 
 function storeState(state: UpdateState)
-    noctalia.writeFile(statePath, noctalia.json.encode(state) or "")
+    local encoded, err = noctalia.json.encode(state)
+    if encoded then
+        noctalia.writeFile(statePath, encoded)
+    else
+        noctalia.log("dnf-updates: failed to encode state: " .. tostring(err))
+    end
 end
 
 function restoreState()
-    local raw = noctalia.readFile(statePath)
+    local raw, readErr = noctalia.readFile(statePath)
 
     if raw then
-        return noctalia.json.decode(raw)
+        local decoded, decErr = noctalia.json.decode(raw)
+        if decoded and type(decoded) == "table" then
+            return decoded
+        else
+            noctalia.log("dnf-updates: failed to decode state file: " .. tostring(decErr))
+        end
+    elseif readErr then
+        noctalia.log("dnf-updates: failed to read state file: " .. tostring(readErr))
     end
     return updateState
 end
@@ -42,35 +60,38 @@ function checkNeedsRestarting()
 end
 
 function publishState(state: UpdateState)
-    noctalia.state.set("updateState", updateState)
+    noctalia.state.set("updateState", state)
     storeState(state)
 end
 
-function handleUpgrades(stdout: CommandResult)
-    if stdout.stdout == "" then
+function handleUpgrades(result: CommandResult)
+    if not result or result.stdout == "" then
         updateState.isUpdated = true
         updateState.updates = {}
         publishState(updateState)
         checkNeedsRestarting()
         return
-
     end
 
     updateState.updates = {}
-    for line in string.gmatch(stdout.stdout, "[^\r\n]+") do
-        if line == "Upgrades" then
-            continue
+    for line in string.gmatch(result.stdout, "[^\r\n]+") do
+        if line ~= "Upgrades" then
+            local packageIterator = string.gmatch(line, "[^%s]+")
+            local name = packageIterator()
+            local version = packageIterator()
+            local status = packageIterator()
+            if name then
+                table.insert(updateState.updates, { name = name, version = version or "", status = status or "" })
+            end
         end
-        local packageIterator = string.gmatch(line, "[^%s]+")
-        table.insert(updateState.updates, {name = packageIterator(), version = packageIterator(), status = packageIterator()})
     end
 
-    if not hasShownUpdateNotification then
+    if not hasShownUpdateNotification and #updateState.updates > 0 then
         noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #updateState.updates))
+        hasShownUpdateNotification = true
     end
 
-    hasShownUpdateNotification = true
-    updateState.isUpdated = false
+    updateState.isUpdated = (#updateState.updates == 0)
     publishState(updateState)
     checkNeedsRestarting()
 end
@@ -95,13 +116,18 @@ function update()
         return
     end
 
+    -- Restore the persisted state on first run while the repositories are being refreshed
+    if firstRun then
+        updateState = restoreState()
+        publishState(updateState)
+        firstRun = false
+    end
+
     if math.fmod(minutesElapsed, cacheRefreshTime) == 0 then
         refreshRepositories()
     else
         checkUpgrades()
     end
 
-    updateState = restoreState()
-    publishState(updateState)
     minutesElapsed = minutesElapsed + 1
 end

@@ -1,4 +1,4 @@
-local panelState: UpdateState = {
+local defaultState: UpdateState = {
     isUpdated = true,
     needsRestart = false,
     updates = {},
@@ -10,7 +10,7 @@ local function upgrade()
 end
 
 local function render()
-    local current = noctalia.state.get("updateState") or { isUpdated = true, needsRestart = false, updates = {} }
+    local current = noctalia.state.get("updateState") or defaultState
     local updates = current.updates or {}
     local labelText = noctalia.trp("updates", #updates)
     local updateRows: {UiNode} = {}
@@ -20,7 +20,7 @@ local function render()
                 ui.glyph({name = "arrow-bar-up"}),
                 ui.box({width = 8, height = 8, opacity = 0}),
                 ui.label({ text = package.name })
-            }),            
+            }),
             ui.label({ text = package.version })
         })
         table.insert(updateRows, packageRow)
@@ -37,7 +37,7 @@ local function render()
             ui.column({ align = "start" }, {
                 ui.label({ text = "Upgrades available", fontSize = 16, fontWeight = "bold" }),
                 ui.label({ text = labelText })
-            }),            
+            }),
             #updates > 0 and ui.button({
                 text = "Upgrade",
                 glyph = "refresh",
@@ -59,7 +59,7 @@ function onOpen(context)
 end
 
 -- TODO - This doesn't seem to update as fast as it does for the widget
--- not sure why
+-- not sure why, so we are accessing the state directly in the render function
 -- noctalia.state.watch("updateState", function(value: UpdateState)
 --     log("Received value in panel")
 --     panelState = value

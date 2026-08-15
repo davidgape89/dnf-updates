@@ -33,7 +33,7 @@ local function render()
         end
     end
 
-    if not updateState.updates then
+    if #updateState.updates == 0 then
         if updateState.needsRestart then
             barWidget.setTooltip(noctalia.tr("rebootNecessary"))
             else

@@ -1,3 +1,5 @@
+local REFRESH_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all refresh"
+
 local updatedGlyph = noctalia.getConfig("updated-glyph")
 local notUpdatedGlyph = noctalia.getConfig("not-updated-glyph")
 local needsRestartGlyph = noctalia.getConfig("needs-restart-glyph")
@@ -51,6 +53,8 @@ end
 function onClick()
     if not updateState.isUpdated then
         noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
+        else
+        noctalia.runAsync(REFRESH_UPDATES_MESSAGE)
     end
 end
 

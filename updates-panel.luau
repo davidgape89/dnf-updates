@@ -1,3 +1,6 @@
+local CHECK_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all check"
+local UPGRADE_COMMAND = "sudo dnf upgrade --refresh; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
+
 local defaultState: UpdateState = {
     isUpdated = true,
     needsRestart = false,
@@ -5,7 +8,7 @@ local defaultState: UpdateState = {
 }
 
 local function upgrade()
-    noctalia.runInTerminal("sudo dnf upgrade --refresh; read -p \"Press Enter to continue...\"")
+    noctalia.runInTerminal(UPGRADE_COMMAND)
     panel.close()
 end
 
@@ -57,11 +60,3 @@ end
 function onOpen(context)
     render()
 end
-
--- TODO - This doesn't seem to update as fast as it does for the widget
--- not sure why, so we are accessing the state directly in the render function
--- noctalia.state.watch("updateState", function(value: UpdateState)
---     log("Received value in panel")
---     panelState = value
---     render()
--- end)

@@ -1,3 +1,5 @@
+local log = require("./log.luau")
+
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local firstRun = true
@@ -24,7 +26,7 @@ function storeState(state: UpdateState)
     if encoded then
         noctalia.writeFile(statePath, encoded)
     else
-        noctalia.log("dnf-updates: failed to encode state: " .. tostring(err))
+        log("dnf-updates: failed to encode state: " .. tostring(err))
     end
 end
 
@@ -36,10 +38,10 @@ function restoreState()
         if decoded and type(decoded) == "table" then
             return decoded
         else
-            noctalia.log("dnf-updates: failed to decode state file: " .. tostring(decErr))
+            log("dnf-updates: failed to decode state file: " .. tostring(decErr))
         end
     elseif readErr then
-        noctalia.log("dnf-updates: failed to read state file: " .. tostring(readErr))
+        log("dnf-updates: failed to read state file: " .. tostring(readErr))
     end
     return updateState
 end
@@ -130,4 +132,16 @@ function update()
     end
 
     minutesElapsed = minutesElapsed + 1
+end
+
+function onIpc(event, payload)
+    if event == "check" then
+        checkUpgrades()
+        return
+    end
+    if event == "refresh" then
+        refreshRepositories()
+        return
+    end
+    log("Unknown event: " .. event)
 end

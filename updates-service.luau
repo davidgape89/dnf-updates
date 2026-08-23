@@ -1,5 +1,9 @@
 local log = require("./log.luau")
 
+-- This command is injected into the upgrade command to do it asynchronously after the upgrade is complete
+local CHECK_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all check > /dev/null"
+local UPGRADE_COMMAND = "sudo dnf upgrade --refresh; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
+
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
 local firstRun = true
@@ -109,7 +113,7 @@ function handleRefreshRepositories(line)
 end
 
 function refreshRepositories()
-    noctalia.runStream("dnf check-upgrade --refresh --color=never", handleRefreshRepositories)
+    noctalia.runStream("dnf makecache --refresh --color=never", handleRefreshRepositories)
 end
 
 function update()
@@ -134,6 +138,10 @@ function update()
     minutesElapsed = minutesElapsed + 1
 end
 
+function upgrade()
+    noctalia.runInTerminal(UPGRADE_COMMAND)
+end
+
 function onIpc(event, payload)
     if event == "check" then
         checkUpgrades()
@@ -141,6 +149,10 @@ function onIpc(event, payload)
     end
     if event == "refresh" then
         refreshRepositories()
+        return
+    end
+    if event == "upgrade" then
+        upgrade()
         return
     end
     log("Unknown event: " .. event)

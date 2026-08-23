@@ -1,5 +1,4 @@
-local CHECK_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all check"
-local UPGRADE_COMMAND = "sudo dnf upgrade --refresh; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
+local UPGRADE_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all upgrade"
 
 local defaultState: UpdateState = {
     isUpdated = true,
@@ -8,7 +7,7 @@ local defaultState: UpdateState = {
 }
 
 local function upgrade()
-    noctalia.runInTerminal(UPGRADE_COMMAND)
+    noctalia.runInTerminal(UPGRADE_MESSAGE)
     panel.close()
 end
 

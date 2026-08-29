@@ -1,6 +1,6 @@
 id = "davidgape89/dnf-updates"
 name = "Dnf Updates"
-version = "0.2.0"
+version = "0.3.0"
 plugin_api = 20
 min_noctalia = "5.0.0"
 author = "davidgape89"
@@ -63,3 +63,4 @@ entry = "updates-service.luau"
 id = "updates-panel"
 entry = "updates-panel.luau"
 placement = "attached"
+width = 600

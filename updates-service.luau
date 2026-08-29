@@ -113,7 +113,7 @@ function handleRefreshRepositories(line)
 end
 
 function refreshRepositories()
-    noctalia.runStream("dnf makecache --refresh --color=never", handleRefreshRepositories)
+    noctalia.runStream("dnf --refresh check-update --color=never", handleRefreshRepositories)
 end
 
 function update()
@@ -132,7 +132,9 @@ function update()
     if math.fmod(minutesElapsed, cacheRefreshTime) == 0 then
         refreshRepositories()
     else
-        checkUpgrades()
+        -- Check upgrades seems to be buggy for now when run periodically
+        -- Sometimes it will inconsistently report no updates when there are
+        -- checkUpgrades()
     end
 
     minutesElapsed = minutesElapsed + 1

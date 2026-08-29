@@ -2,7 +2,7 @@
   "lsp": {
     "luau-lsp": {
       "settings": {
-        "definitions": ["./noctalia.d.luau", "./updates.d.luau"]
+        "definitions": ["noctalia.d.luau", "updates.d.luau"]
       }
     },
   }

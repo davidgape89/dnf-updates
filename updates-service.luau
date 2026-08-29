@@ -1,8 +1,5 @@
 local log = require("./log.luau")
-
--- This command is injected into the upgrade command to do it asynchronously after the upgrade is complete
-local CHECK_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all check > /dev/null"
-local UPGRADE_COMMAND = "sudo dnf upgrade --refresh; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
+local dnfAdapter = require("./adapters/dnf.luau")
 
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
@@ -70,50 +67,15 @@ function publishState(state: UpdateState)
     storeState(state)
 end
 
-function handleUpgrades(result: CommandResult)
-    if not result or result.stdout == "" then
-        updateState.isUpdated = true
-        updateState.updates = {}
-        publishState(updateState)
-        checkNeedsRestarting()
-        return
-    end
-
-    updateState.updates = {}
-    for line in string.gmatch(result.stdout, "[^\r\n]+") do
-        if line ~= "Upgrades" then
-            local packageIterator = string.gmatch(line, "[^%s]+")
-            local name = packageIterator()
-            local version = packageIterator()
-            local status = packageIterator()
-            if name then
-                table.insert(updateState.updates, { name = name, version = version or "", status = status or "" })
-            end
-        end
-    end
-
+function handleUpdates(updateState: UpdateState)
+    log("handleUpgrades called")
     if not hasShownUpdateNotification and #updateState.updates > 0 then
         noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #updateState.updates))
         hasShownUpdateNotification = true
     end
 
-    updateState.isUpdated = (#updateState.updates == 0)
     publishState(updateState)
     checkNeedsRestarting()
-end
-
-function checkUpgrades()
-    noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades)
-end
-
-function handleRefreshRepositories(line)
-    if line == "Upgrades" then
-        checkUpgrades()
-    end
-end
-
-function refreshRepositories()
-    noctalia.runStream("dnf --refresh check-update --color=never", handleRefreshRepositories)
 end
 
 function update()
@@ -130,7 +92,8 @@ function update()
     end
 
     if math.fmod(minutesElapsed, cacheRefreshTime) == 0 then
-        refreshRepositories()
+        log("Refreshing repositories")
+        dnfAdapter.refreshRepositories(handleUpdates)
     else
         -- Check upgrades seems to be buggy for now when run periodically
         -- Sometimes it will inconsistently report no updates when there are
@@ -140,21 +103,18 @@ function update()
     minutesElapsed = minutesElapsed + 1
 end
 
-function upgrade()
-    noctalia.runInTerminal(UPGRADE_COMMAND)
-end
-
 function onIpc(event, payload)
     if event == "check" then
-        checkUpgrades()
+        dnfAdapter.checkUpdates(handleUpdates)
         return
     end
     if event == "refresh" then
-        refreshRepositories()
+        log("Refreshing repositories")
+        dnfAdapter.refreshRepositories(handleUpdates)
         return
     end
     if event == "upgrade" then
-        upgrade()
+        dnfAdapter.upgrade()
         return
     end
     log("Unknown event: " .. event)

@@ -1,5 +1,7 @@
 local log = require("./log.luau")
 local dnfAdapter = require("./adapters/dnf.luau")
+local zypperAdapter = require("./adapters/zypper.luau")
+local mainAdapter = nil
 
 local hasShownUpdateNotification = false
 local hasShownRestartNotification = false
@@ -68,7 +70,6 @@ function publishState(state: UpdateState)
 end
 
 function handleUpdates(updateState: UpdateState)
-    log("handleUpgrades called")
     if not hasShownUpdateNotification and #updateState.updates > 0 then
         noctalia.notify(noctalia.tr("updatesAvailable"), noctalia.trp("updates", #updateState.updates))
         hasShownUpdateNotification = true
@@ -79,7 +80,14 @@ function handleUpdates(updateState: UpdateState)
 end
 
 function update()
-    if not noctalia.commandExists("dnf") then
+    if noctalia.commandExists("dnf") then
+        mainAdapter = dnfAdapter
+    end
+    if noctalia.commandExists("zypper") then
+        mainAdapter = zypperAdapter
+    end
+    if mainAdapter == nil then
+        -- TODO - Change key so it is not dnf specific
         noctalia.notify(noctalia.tr("dnfMissing"), noctalia.tr("dnfMissingSub"))
         return
     end
@@ -92,8 +100,7 @@ function update()
     end
 
     if math.fmod(minutesElapsed, cacheRefreshTime) == 0 then
-        log("Refreshing repositories")
-        dnfAdapter.refreshRepositories(handleUpdates)
+        mainAdapter.refreshRepositories(handleUpdates)
     else
         -- Check upgrades seems to be buggy for now when run periodically
         -- Sometimes it will inconsistently report no updates when there are
@@ -105,16 +112,15 @@ end
 
 function onIpc(event, payload)
     if event == "check" then
-        dnfAdapter.checkUpdates(handleUpdates)
+        mainAdapter.checkUpdates(handleUpdates)
         return
     end
     if event == "refresh" then
-        log("Refreshing repositories")
-        dnfAdapter.refreshRepositories(handleUpdates)
+        mainAdapter.refreshRepositories(handleUpdates)
         return
     end
     if event == "upgrade" then
-        dnfAdapter.upgrade()
+        mainAdapter.upgrade()
         return
     end
     log("Unknown event: " .. event)

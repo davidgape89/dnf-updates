@@ -1,8 +1,8 @@
 local log = require("../log.luau")
-
+local CHECK_UPDATES = "zypper lu"
 -- Force the service to check for cached updates after the upgrade is complete
 local CHECK_UPDATES_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all check > /dev/null"
-local UPGRADE_COMMAND = "sudo dnf upgrade --refresh; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
+local UPGRADE_COMMAND = "sudo zypper dup; " .. CHECK_UPDATES_MESSAGE .. "; read -p \"Press Enter to continue...\""
 function handleUpgrades(updatesCallback)
     return function(result: CommandResult)
         local updateState = { isUpdated = true, updates = {} }
@@ -12,11 +12,13 @@ function handleUpgrades(updatesCallback)
         end
 
         for line in string.gmatch(result.stdout, "[^\r\n]+") do
-            if line ~= "Upgrades" then
-                local packageIterator = string.gmatch(line, "[^%s]+")
-                local name = packageIterator()
-                local version = packageIterator()
+            if string.match(line, "^v") ~= nil then
+                local packageIterator = string.gmatch(line, "|%s([^|]*)")
                 local repository = packageIterator()
+                local name = packageIterator()
+                -- This is the current version of tha package
+                local _ = packageIterator()
+                local version = packageIterator()
                 if name then
                     table.insert(updateState.updates, { name = name, version = version or "", repository = repository or "" })
                 end
@@ -29,24 +31,14 @@ function handleUpgrades(updatesCallback)
 end
 
 function checkUpdates(updatesCallback)
-    noctalia.runAsync("dnf check-upgrade -C --color=never -q", handleUpgrades(updatesCallback))
+    noctalia.runAsync(CHECK_UPDATES, handleUpgrades(updatesCallback))
 end
 
-function handleRefreshRepositories(updatesCallback)
-    log("inside handleRefreshRepositories")
-    return function(line)
-        log("handleRefreshRepositories: " .. line)
-        if line == "Upgrades" then
-            checkUpdates(updatesCallback)
-        end
-    end
-end
-
-local dnfAdapter: UpdateAdapter = {
+local zypperAdapter: UpdateAdapter = {
+    -- The repositories cannot be refreshed as a non-root user with zypper
     -- Refreshes the repositories and checks for updates
     refreshRepositories = function(updatesCallback)
-        log("inside adapter")
-        noctalia.runStream("dnf --refresh check-update --color=never", handleRefreshRepositories(updatesCallback))
+        checkUpdates(updatesCallback)
     end,
     -- Checks for updates from cached repositories
     checkUpdates = function(updatesCallback)
@@ -58,4 +50,4 @@ local dnfAdapter: UpdateAdapter = {
     end,
 }
 
-return dnfAdapter
+return zypperAdapter

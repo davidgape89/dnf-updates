@@ -29,7 +29,7 @@ function storeState(state: UpdateState)
     if encoded then
         noctalia.writeFile(statePath, encoded)
     else
-        log("dnf-updates: failed to encode state: " .. tostring(err))
+        log("failed to encode state: " .. tostring(err))
     end
 end
 
@@ -41,10 +41,10 @@ function restoreState()
         if decoded and type(decoded) == "table" then
             return decoded
         else
-            log("dnf-updates: failed to decode state file: " .. tostring(decErr))
+            log("failed to decode state file: " .. tostring(decErr))
         end
     elseif readErr then
-        log("dnf-updates: failed to read state file: " .. tostring(readErr))
+        log("failed to read state file: " .. tostring(readErr))
     end
     return updateState
 end

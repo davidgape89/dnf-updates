@@ -52,7 +52,7 @@ end
 
 function onClick()
     if not updateState.isUpdated then
-        noctalia.togglePanel("davidgape89/dnf-updates:updates-panel")
+        noctalia.togglePanel("davidgape89/dnf-updates:panel")
         else
         noctalia.runAsync(REFRESH_UPDATES_MESSAGE)
     end

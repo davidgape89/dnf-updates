@@ -1,4 +1,4 @@
-local UPGRADE_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:updates-service all upgrade"
+local UPGRADE_MESSAGE = "noctalia msg plugin davidgape89/dnf-updates:service all upgrade"
 
 local defaultState: UpdateState = {
     isUpdated = true,

@@ -33,9 +33,7 @@ function checkUpdates(updatesCallback)
 end
 
 function handleRefreshRepositories(updatesCallback)
-    log("inside handleRefreshRepositories")
     return function(line)
-        log("handleRefreshRepositories: " .. line)
         if line == "Upgrades" then
             checkUpdates(updatesCallback)
         end
@@ -45,7 +43,6 @@ end
 local dnfAdapter: UpdateAdapter = {
     -- Refreshes the repositories and checks for updates
     refreshRepositories = function(updatesCallback)
-        log("inside adapter")
         noctalia.runStream("dnf --refresh check-update --color=never", handleRefreshRepositories(updatesCallback))
     end,
     -- Checks for updates from cached repositories

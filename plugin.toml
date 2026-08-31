@@ -19,7 +19,7 @@ min = 1
 max = 60
 
 [[widget]]
-id = "updates-widget"
+id = "widget"
 entry = "updates-widget.luau"
 
   [[widget.setting]]
@@ -56,11 +56,11 @@ entry = "updates-widget.luau"
   default = true
 
 [[service]]
-id = "updates-service"
+id = "service"
 entry = "updates-service.luau"
 
 [[panel]]
-id = "updates-panel"
+id = "panel"
 entry = "updates-panel.luau"
 placement = "attached"
 width = 600
